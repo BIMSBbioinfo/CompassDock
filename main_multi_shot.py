@@ -1,6 +1,6 @@
 import os
 import glob
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser, FileType, Namespace
 import wandb
 
 from inference_wrap import run_docking
@@ -54,6 +54,9 @@ parser.add_argument('--gnina_poses_to_optimize', type=int, default=1)
 
 parser.add_argument('--max_recursion_step', type=int, default=5, help='')
 parser.add_argument('--wandb_path', type=str, default='wandb', help='')
+parser.add_argument('--protein_dir', type=str, default=None, help='')
+parser.add_argument('--start', type=int, default=None, help='Start index of pdb file range')
+parser.add_argument('--end', type=int, default=None, help='End index of the pdb file range')
 
 args = parser.parse_args()
 
@@ -92,10 +95,10 @@ def process_sdf_file(write_dir, sdf_file, args, protein_path_list, iteration, li
 
     os.environ["WANDB_MODE"] = "dryrun"
     # Set the WANDB_DIR environment variable
-    #os.environ['WANDB_DIR'] = args.wandb_path
+    os.environ['WANDB_DIR'] = args.wandb_path
 
     processed_sdf_directory = os.path.join(write_dir, "processed_sdf_files")
-    energy_calc_path = "/fast/AG_Akalin/asarigun/Arcas_Stage_1/DiffDock_Compass_Develop"
+    energy_calc_path = "/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS"
     pocket_path = os.path.join(write_dir, "pockets/")
     protein_path = protein_path_list[0]
 
@@ -255,7 +258,25 @@ def main():
     print(logo2)
     print(art_decore)
 
-    recursive_docking_and_processing(args)
+    if args.protein_dir:
+    
+        # Get a list of all .pdb files in the directory
+        pdb_files = sorted([file for file in os.listdir(args.protein_dir) if file.endswith('.pdb')])
+
+        # Process only the first two PDB files
+        for protein_file in pdb_files[args.start:args.end]:  # This slices the list to include only the first two elements
+            protein_path = os.path.join(args.protein_dir, protein_file)
+            
+            # Create a copy of args to modify for each protein file
+            # This avoids altering the original args object directly
+            current_args = Namespace(**vars(args))
+            current_args.protein_path = protein_path
+            current_args.complex_name = protein_file[:-4]  # Remove the '.pdb' extension for the complex name
+
+            recursive_docking_and_processing(current_args)
+
+    else:
+        recursive_docking_and_processing(args)
 
 if __name__ == "__main__":
     main()
@@ -267,8 +288,22 @@ python -W ignore -m main_multi_shot --config DiffDock/default_inference_args.yam
 
 python -W ignore -m main_multi_shot --config DiffDock/default_inference_args.yaml --complex_name TEST --protein_path /fast/AG_Akalin/asarigun/Arcas_Stage_1/PROTEIN_DB/AlphaFold_HUMAN_v3/AF-P14618-F1-model_v3.pdb --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" --out_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/FACTORY/RESULTS/TREAMID_AF/results --max_recursion_step 5
 
-python -W ignore -m main_multi_shot --config DiffDock/default_inference_args.yaml --complex_name TEST --protein_path /fast/AG_Akalin/asarigun/Arcas_Stage_1/PROTEIN_DB/AlphaFold_HUMAN_v3/AF-P14618-F1-model_v3.pdb --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" --out_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/FACTORY/RESULTS/TREAMID_AF/results --max_recursion_step
+python -W ignore -m main_multi_shot --config DiffDock/default_inference_args.yaml --complex_name TEST --protein_path /p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS/DiffDock/examples/1a46_protein_processed.pdb --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" --out_dir results --max_recursion_step 2
+
+
+python -W ignore -m main_multi_shot --config DiffDock/default_inference_args.yaml --complex_name TEST --protein_path DiffDock/examples/1a46_protein_processed.pdb --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" --out_dir results --max_recursion_step 2
+
+python -W ignore -m main_multi_shot --config DiffDock/default_inference_args.yaml --protein_dir /p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS/DiffDock/examples --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" --out_dir results --max_recursion_step 2
 
 
 python -W ignore -m main_multi_shot   --config DiffDock/default_inference_args.yaml   --complex_name AF-Q2M1K9-F1-model_v3   --protein_path /fast/AG_Akalin/asarigun/Arcas_Stage_1/PROTEIN_DB/AlphaFold_HUMAN_v3/AF-Q2M1K9-F1-model_v3.pdb   --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2"   --out_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/FACTORY/RESULTS/TREAMID_AF/results/   --max_recursion_step 5   --wandb_path /fast/AG_Akalin/asarigun/Arcas_Stage_1/FACTORY/RESULTS/TREAMID_AF
+
+if protein_dir:
+
+python -W ignore -m main_multi_shot --config DiffDock/default_inference_args.yaml --protein_dir /p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS/DiffDock/examples --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" --out_dir results --max_recursion_step 1 --start 0 --end 3
+
+else:
+
+python -W ignore -m main_multi_shot --config DiffDock/default_inference_args.yaml --complex_name TEST --protein_path /p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS/DiffDock/examples/1a46_protein_processed.pdb --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" --out_dir results --max_recursion_step 1
+
 """
