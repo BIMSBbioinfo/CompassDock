@@ -259,11 +259,10 @@ def main():
     print(art_decore)
 
     if args.protein_dir:
-    
-        # Get a list of all .pdb files in the directory
+        # Get a list of all .pdb files in the directory and sort them alphabetically
         pdb_files = sorted([file for file in os.listdir(args.protein_dir) if file.endswith('.pdb')])
 
-        # Process only the first two PDB files
+        # Process PDB files within the specified range
         for protein_file in pdb_files[args.start:args.end]:  # This slices the list to include only the first two elements
             protein_path = os.path.join(args.protein_dir, protein_file)
             
@@ -273,7 +272,12 @@ def main():
             current_args.protein_path = protein_path
             current_args.complex_name = protein_file[:-4]  # Remove the '.pdb' extension for the complex name
 
-            recursive_docking_and_processing(current_args)
+            try:
+                recursive_docking_and_processing(current_args)
+            except Exception as e:
+                print(f"Error processing {protein_file}: {e}")
+                # Optionally, log the error or handle it as needed
+                continue  # This ensures the loop continues with the next file
 
     else:
         recursive_docking_and_processing(args)
