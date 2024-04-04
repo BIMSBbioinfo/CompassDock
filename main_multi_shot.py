@@ -2,6 +2,7 @@ import os
 import glob
 from argparse import ArgumentParser, FileType, Namespace
 import wandb
+from pytorch_lightning.loggers import WandbLogger
 
 from inference_wrap import run_docking
 from compass import run_obabel, run_get_pocket, binding_affinity, posecheck_eval
@@ -53,7 +54,7 @@ parser.add_argument('--gnina_autobox_add', type=float, default=4.0)
 parser.add_argument('--gnina_poses_to_optimize', type=int, default=1)
 
 parser.add_argument('--max_recursion_step', type=int, default=5, help='')
-parser.add_argument('--wandb_path', type=str, default='wandb', help='')
+parser.add_argument('--wandb_path', type=str, default='/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS', help='')
 parser.add_argument('--protein_dir', type=str, default=None, help='')
 parser.add_argument('--start', type=int, default=None, help='Start index of pdb file range')
 parser.add_argument('--end', type=int, default=None, help='End index of the pdb file range')
@@ -96,6 +97,9 @@ def process_sdf_file(write_dir, sdf_file, args, protein_path_list, iteration, li
     os.environ["WANDB_MODE"] = "dryrun"
     # Set the WANDB_DIR environment variable
     os.environ['WANDB_DIR'] = args.wandb_path
+    os.environ["WANDB__SERVICE_WAIT"] = "300"
+
+    wandb_logger = WandbLogger()
 
     processed_sdf_directory = os.path.join(write_dir, "processed_sdf_files")
     energy_calc_path = "/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS"
