@@ -102,7 +102,7 @@ def process_sdf_file(write_dir, sdf_file, args, protein_path_list, iteration, li
     wandb_logger = WandbLogger()
 
     processed_sdf_directory = os.path.join(write_dir, "processed_sdf_files")
-    energy_calc_path = "/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS"
+    energy_calc_path = "/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS"
     pocket_path = os.path.join(write_dir, "pockets/")
     protein_path = protein_path_list[0]
 

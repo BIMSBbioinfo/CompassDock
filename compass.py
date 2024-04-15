@@ -4,12 +4,12 @@ from rdkit import Chem, RDLogger
 
 
 
-sys.path.append('/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS/AA_Score_Tool/')
+sys.path.append('/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS/AA_Score_Tool/')
 # Ensure the path is correctly added. This path should be to the directory containing the PoseCheck module.
-sys.path.append('/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS/posecheck/')
+sys.path.append('/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS/posecheck/')
 
 # export PYTHONPATH="/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/diffdock_new_version:$PYTHONPATH"
-path_to_add = "/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS"
+path_to_add = "/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS"
 
 # Prepend the path to sys.path
 if path_to_add not in sys.path:
