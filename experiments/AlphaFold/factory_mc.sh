@@ -11,7 +11,7 @@ fi
 # Start and end values
 START=0
 END=150
-MAX=23391
+MAX=3213
 
 # Script counter
 COUNTER=1
@@ -21,11 +21,11 @@ while [ $START -lt $MAX ]; do
   # Create a bash script for the current range, saving in the specified folder
   cat <<EOT > "$SCRIPTS_FOLDER/job_script_$COUNTER.sh"
 #!/bin/bash
-#$ -l gpu=1 -l cuda_memory=35G
+#$ -l gpu=1 -l cuda_memory=40G
 #$ -cwd
 #$ -V
 #$ -N "diffdock_compass_AlphaFold_${COUNTER}"
-#$ -l h_rt=120:00:00
+#$ -l h_rt=12:00:00
 #$ -pe smp 1
 #$ -e /fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/FACTORY/RESULTS/TREAMID_AF/job_errors/
 #$ -o /fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/FACTORY/RESULTS/TREAMID_AF/job_outputs/
@@ -43,7 +43,7 @@ conda activate diffdock_compass
 
 python -W ignore -m main_multi_shot \
   --config DiffDock/default_inference_args.yaml \
-  --protein_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/AlphaFold_HUMAN_v3 \
+  --protein_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/AlphaFold_HUMAN_v3_missing_RUNS \
   --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" \
   --out_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/FACTORY/RESULTS/TREAMID_AF/results/ \
   --max_recursion_step 5 \

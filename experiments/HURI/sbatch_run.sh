@@ -7,7 +7,7 @@ scripts_dir="/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/FACTORY/RUNS/TREAMID_HU
 counter=0
 
 # Maximum number of scripts to submit
-max_submissions=482
+max_submissions=271
 
 # Submit the scripts
 for script_file in "${scripts_dir}"/*.sh; do

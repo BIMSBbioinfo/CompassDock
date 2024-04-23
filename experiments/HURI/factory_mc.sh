@@ -11,7 +11,7 @@ fi
 # Start and end values
 START=0
 END=150
-MAX=72156
+MAX=40601
 
 # Script counter
 COUNTER=1
@@ -21,7 +21,7 @@ while [ $START -lt $MAX ]; do
   # Create a bash script for the current range, saving in the specified folder
   cat <<EOT > "$SCRIPTS_FOLDER/job_script_$COUNTER.sh"
 #!/bin/bash
-#$ -l gpu=1 -l cuda_memory=32G
+#$ -l gpu=1 -l cuda_memory=40G
 #$ -cwd
 #$ -V
 #$ -N "diffdock_compass_HuRI_${COUNTER}"
@@ -43,7 +43,7 @@ conda activate diffdock_compass
 
 python -W ignore -m main_multi_shot \
   --config DiffDock/default_inference_args.yaml \
-  --protein_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/HuRI_missing_RUNS \
+  --protein_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/HuRI_missing_RUNS2 \
   --ligand_description "C1=CN=C(N1)CCNC(=O)CCCC(=O)NCCC2=NC=CN2" \
   --out_dir /fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/FACTORY/RESULTS/TREAMID_HURI/results/ \
   --max_recursion_step 5 \

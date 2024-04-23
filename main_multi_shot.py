@@ -1,6 +1,7 @@
 import os
 import glob
 from argparse import ArgumentParser, FileType, Namespace
+import pandas as pd
 import wandb
 from pytorch_lightning.loggers import WandbLogger
 
@@ -56,8 +57,12 @@ parser.add_argument('--gnina_poses_to_optimize', type=int, default=1)
 parser.add_argument('--max_recursion_step', type=int, default=5, help='')
 parser.add_argument('--wandb_path', type=str, default='/p/project/hai_bimsb_dock_drug/Arcas_Stage_1/ROOF/COMPASS', help='')
 parser.add_argument('--protein_dir', type=str, default=None, help='')
-parser.add_argument('--start', type=int, default=None, help='Start index of pdb file range')
-parser.add_argument('--end', type=int, default=None, help='End index of the pdb file range')
+parser.add_argument('--smiles_dir', type=str, default=None, help='')
+parser.add_argument('--eos', type=str, default=None, help='')
+parser.add_argument('--protein_start', type=int, default=None, help='Start index of pdb file range')
+parser.add_argument('--protein_end', type=int, default=None, help='End index of the pdb file range')
+parser.add_argument('--smiles_start', type=int, default=None, help='Start index of smiles range')
+parser.add_argument('--smiles_end', type=int, default=None, help='End index of the smiles file range')
 
 args = parser.parse_args()
 
@@ -117,8 +122,11 @@ def process_sdf_file(write_dir, sdf_file, args, protein_path_list, iteration, li
     print("Recursion Step Done:", recursion_step)
     wandb.log({"Recursion Step Done": recursion_step})
     
-    print("Ligand Description:", ligand_description)
-    wandb.log({"Ligand Description": ligand_description})
+    print("Ligand Description:", args.ligand_description)
+    wandb.log({"Ligand Description": args.ligand_description})
+
+    if args.eos:
+        wandb.log({"SMILES EOS ID": args.eos})
     
     file_base_name = os.path.basename(sdf_file).replace('.sdf', '')
     
@@ -266,22 +274,51 @@ def main():
         # Get a list of all .pdb files in the directory and sort them alphabetically
         pdb_files = sorted([file for file in os.listdir(args.protein_dir) if file.endswith('.pdb')])
 
-        # Process PDB files within the specified range
-        for protein_file in pdb_files[args.start:args.end]:  # This slices the list to include only the first two elements
-            protein_path = os.path.join(args.protein_dir, protein_file)
-            
-            # Create a copy of args to modify for each protein file
-            # This avoids altering the original args object directly
-            current_args = Namespace(**vars(args))
-            current_args.protein_path = protein_path
-            current_args.complex_name = protein_file[:-4]  # Remove the '.pdb' extension for the complex name
 
-            try:
-                recursive_docking_and_processing(current_args)
-            except Exception as e:
-                print(f"Error processing {protein_file}: {e}")
-                # Optionally, log the error or handle it as needed
-                continue  # This ensures the loop continues with the next file
+        if args.smiles_dir:
+            # Assuming the .txt file uses a specific delimiter like tab; adjust 'sep' as needed
+            smiles_data = pd.read_csv(args.smiles_dir, sep='\t', header=0)  # Check the delimiter of your file
+
+            selected_smiles = smiles_data.loc[args.smiles_start:args.smiles_end, 'smiles']
+            selected_eos = smiles_data.loc[args.smiles_start:args.smiles_end, 'eos']
+
+            for index, smile in selected_smiles.items():  # Use 'items()' to get index and value from the Series
+                eos = selected_eos.loc[index]
+                # Process PDB files within the specified range
+                for protein_file in pdb_files[args.protein_start:args.protein_end]:  # This slices the list to include only the specified elements
+                    protein_path = os.path.join(args.protein_dir, protein_file)
+                    
+                    # Create a copy of args to modify for each protein file
+                    current_args = Namespace(**vars(args))
+                    current_args.protein_path = protein_path
+                    current_args.ligand_description = smile
+                    current_args.eos = eos
+                    current_args.complex_name = protein_file[:-4] + '_' + eos  # Concatenate file name with EOS
+
+                    try:
+                        recursive_docking_and_processing(current_args)
+                    except Exception as e:
+                        print(f"Error processing {protein_file}: {e}")
+                        continue  # Continues with the next file
+                
+
+        else:
+            # Process PDB files within the specified range
+            for protein_file in pdb_files[args.protein_start:args.protein_end]:  # This slices the list to include only the first two elements
+                protein_path = os.path.join(args.protein_dir, protein_file)
+                
+                # Create a copy of args to modify for each protein file
+                # This avoids altering the original args object directly
+                current_args = Namespace(**vars(args))
+                current_args.protein_path = protein_path
+                current_args.complex_name = protein_file[:-4] + '_' + current_args.ligand_description # Remove the '.pdb' extension for the complex name
+
+                try:
+                    recursive_docking_and_processing(current_args)
+                except Exception as e:
+                    print(f"Error processing {protein_file}: {e}")
+                    # Optionally, log the error or handle it as needed
+                    continue  # This ensures the loop continues with the next file
 
     else:
         recursive_docking_and_processing(args)

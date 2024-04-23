@@ -2,13 +2,13 @@ import shutil
 import os
 
 # Path to your text file containing Protein IDs
-text_file_path = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS/experiments/HURI/missing_runs.txt'
+text_file_path = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS/experiments/AlphaFold/missing_runs.txt'
 
 # Directory containing your original .pdb files
-source_directory = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/HuRI'
+source_directory = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/AlphaFold_HUMAN_v3'
 
 # Target directory where you want to copy the .pdb files
-target_directory = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/HuRI_missing_RUNS'
+target_directory = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/AlphaFold_HUMAN_v3_missing_RUNS'
 
 # Ensure the target directory exists
 os.makedirs(target_directory, exist_ok=True)

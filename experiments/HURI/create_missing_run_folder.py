@@ -8,7 +8,7 @@ text_file_path = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS/experiment
 source_directory = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/HuRI'
 
 # Target directory where you want to copy the .pdb files
-target_directory = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/HuRI_missing_RUNS'
+target_directory = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/PROTEIN_DB/HuRI_missing_RUNS2'
 
 # Ensure the target directory exists
 os.makedirs(target_directory, exist_ok=True)

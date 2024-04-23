@@ -6,7 +6,7 @@ import glob
 import traceback
 
 # Base directory containing your WandB run subfolders
-base_directory = "/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/FACTORY/RESULTS/TREAMID_HURI/wandb"
+base_directory = "/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/FACTORY/RESULTS/TREAMID_AF/wandb"
 
 # Prepare a dictionary to hold lists of values for each key of interest
 summary_values = {
