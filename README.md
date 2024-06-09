@@ -100,9 +100,8 @@ python -W ignore -m finetune --config experiments/model_parameters.yml
 
 
 ## Acknowledgements <a name="acknowledgements"></a>
-We sincerely thank:
+We extend our deepest gratitude to the following teams for open-sourcing their valuable Repos:
 * [DiffDock Team](https://github.com/gcorso/DiffDock) (version 2023 & 2024),
 * [AA-score Team](https://github.com/Xundrug/AA-Score-Tool),
 * [PoseCheck Team](https://github.com/cch1999/posecheck) 
 
-for making the studies for open-sourcing.
