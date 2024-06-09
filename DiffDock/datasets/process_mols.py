@@ -305,6 +305,7 @@ def get_lig_graph(mol, complex_graph):
 
 
 def generate_conformer(mol):
+    Chem.AssignStereochemistry(mol, cleanIt=True, force=True)
     ps = AllChem.ETKDGv2()
     failures, id = 0, -1
     while failures < 3 and id == -1:

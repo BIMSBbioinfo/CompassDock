@@ -10,6 +10,7 @@ import openbabel as ob
 import prolif as plf
 import rdkit.Chem as Chem
 from rdkit import Chem
+from rdkit.Chem import AllChem
 
 from posecheck.utils.chem import remove_radicals
 from posecheck.utils.constants import REDUCE_PATH, SPLIT_PATH
@@ -57,7 +58,7 @@ def load_protein_from_pdb(pdb_path: str, reduce_path: str = REDUCE_PATH):
     Returns:
         plf.Molecule: The loaded protein as a prolif.Molecule.
     """
-    tmp_path = pdb_path.split(".pdb")[0] + "_tmp.pdb"
+    '''tmp_path = pdb_path.split(".pdb")[0] + "_tmp.pdb"
 
     # Call reduce to make tmp PDB with waters
     reduce_command = f"{reduce_path} -NOFLIP  {pdb_path} -Quiet > {tmp_path}"
@@ -65,6 +66,23 @@ def load_protein_from_pdb(pdb_path: str, reduce_path: str = REDUCE_PATH):
 
     # Load the protein from the temporary PDB file
     prot = load_protein_prolif(tmp_path)
+    os.remove(tmp_path)'''
+    # Read the protein file
+    pdb_mol = Chem.MolFromPDBFile(pdb_path, removeHs=False)
+
+    # Add hydrogens
+    pdb_mol_h = Chem.AddHs(pdb_mol)
+
+    # Optional: Optimize the geometry of the added hydrogens
+    AllChem.EmbedMolecule(pdb_mol_h, AllChem.ETKDG())
+    AllChem.MMFFOptimizeMolecule(pdb_mol_h)
+
+    # Save the modified molecule to a temporary PDB file
+    tmp_path = pdb_path.split(".pdb")[0] + "_tmp.pdb"
+    Chem.MolToPDBFile(pdb_mol_h, tmp_path)
+
+    # Load the protein from the temporary PDB file
+    prot = plf.Molecule.from_file(tmp_path)
     os.remove(tmp_path)
 
     return prot

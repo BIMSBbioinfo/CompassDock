@@ -1,12 +1,11 @@
 import torch
 from torch_geometric.data import Dataset
 
-from datasets.dataloader import DataLoader, DataListLoader
-from datasets.moad import MOAD
-from datasets.pdb import PDBSidechain
-from datasets.pdbbind import NoiseTransform, PDBBind
-from utils.utils import read_strings_from_txt
-
+from DiffDock.datasets.dataloader import DataLoader, DataListLoader
+from DiffDock.datasets.moad import MOAD
+from DiffDock.datasets.pdb_dock import PDBSidechain
+from DiffDock.datasets.pdbbind import NoiseTransform, PDBBind
+from DiffDock.utils.utils import read_strings_from_txt
 
 class CombineDatasets(Dataset):
     def __init__(self, dataset1, dataset2):

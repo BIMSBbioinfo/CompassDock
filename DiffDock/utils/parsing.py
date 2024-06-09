@@ -5,7 +5,7 @@ def parse_train_args():
 
     # General arguments
     parser = ArgumentParser()
-    parser.add_argument('--config', type=FileType(mode='r'), default=None)
+    parser.add_argument('--config', type=str, default=None)
     parser.add_argument('--log_dir', type=str, default='workdir/test_score', help='Folder in which to save model and logs')
     parser.add_argument('--restart_dir', type=str, help='Folder of previous training model from which to restart')
     parser.add_argument('--restart_ckpt', type=str, default='last_model', help='')
@@ -89,6 +89,7 @@ def parse_train_args():
     parser.add_argument('--tr_weight', type=float, default=0.33, help='Weight of translation loss')
     parser.add_argument('--rot_weight', type=float, default=0.33, help='Weight of rotation loss')
     parser.add_argument('--tor_weight', type=float, default=0.33, help='Weight of torsional loss')
+    parser.add_argument('--compass_weight', type=float, default=0.01, help='Weight of torsional loss')
     parser.add_argument('--confidence_weight', type=float, default=0.33, help='Weight of confidence loss')
     parser.add_argument('--rot_sigma_min', type=float, default=0.1, help='Minimum sigma for rotational component')
     parser.add_argument('--rot_sigma_max', type=float, default=1.65, help='Maximum sigma for rotational component')

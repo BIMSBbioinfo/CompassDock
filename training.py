@@ -1,20 +1,99 @@
 import copy
+import os
 import numpy as np
 from rdkit.Chem import RemoveAllHs
 from torch_geometric.loader import DataLoader
 from tqdm import tqdm
 import torch
 import itertools
+from rdkit import Chem
+from rdkit.Chem import AddHs, MolFromSmiles
+import pandas as pd
 
+
+from DiffDock.datasets.process_mols import generate_conformer, read_molecule
 from DiffDock.confidence.dataset import ListDataset
 from DiffDock.utils import so3, torus
 from DiffDock.utils.molecules_utils import get_symmetry_rmsd
 from DiffDock.utils.sampling import randomize_position, sampling
 from DiffDock.utils.diffusion_utils import get_t_schedule
+from DiffDock.utils.diffusion_utils import modify_conformer, set_time, modify_conformer_batch
+from DiffDock.datasets.process_mols import write_mol_with_coords
+from compass import process_docked_file
+
+def get_compass_precalculated_data(protein_id):
+    # Load the CSV file into a DataFrame
+    file_path = 'experiments/PDBBind_GT/data/pdbbind_gt_compass.csv'
+    df = pd.read_csv(file_path)
+
+    # Filter the DataFrame for the specified Protein ID
+    protein_data = df[df['Protein ID'] == protein_id]
+
+    # Check if the Protein ID is found
+    if not protein_data.empty:
+        # Extract and print the required data
+        binding_affinity = protein_data['Binding Affinity (kcal/mol)'].values[0]
+        strain_energy = protein_data['Strain Energy'].values[0]
+        number_of_clashes = protein_data['Number of clashes'].values[0]
+        
+        print(f"Ground Truth Protein ID: {protein_id}, Binding Affinity (kcal/mol): {binding_affinity}, Strain Energy: {strain_energy}, Number of Clashes: {number_of_clashes}")
+    else:
+        print(f"No data found for Protein ID: {protein_id}")
+    
+    return binding_affinity, number_of_clashes, strain_energy
+
+def LANMSE(pred, true):
+    'Log Absolute Normalized - MSE'
+    epsilon = 1e-5  # Small constant to avoid division by zero
+    # Apply a logarithmic transformation with a shift to ensure positive values
+    if torch.abs(true).item() < 1:
+        buffer_true = 1.1
+    else:
+        buffer_true = 1.0
+    
+    if torch.abs(pred).item() < 1:
+        buffer_pred = 1.1
+    else:
+        buffer_pred = 1.0
+    
+    pred_log = torch.log(torch.abs(pred) + buffer_pred)
+    true_log = torch.log(torch.abs(true) + buffer_true)
+    
+    # Compute the mean squared error on the transformed values
+    return torch.mean(((true_log - pred_log) / (torch.abs(true_log)*2 + epsilon)) ** 2)
+
+
+def compass_constant(true_affinity, pred_affinity, true_strain, pred_strain, true_clashes, pred_clashes_probs):
+
+    true_values = torch.stack([
+        torch.tensor([true_affinity], dtype=torch.float32),
+        torch.tensor([true_strain], dtype=torch.float32),
+        torch.tensor([true_clashes], dtype=torch.float32)
+    ])
+
+    pred_values = torch.stack([
+        torch.tensor([pred_affinity], dtype=torch.float32),
+        torch.tensor([pred_strain], dtype=torch.float32),
+        torch.tensor([pred_clashes_probs], dtype=torch.float32)
+    ])
+
+    # Compute losses for each pair of true and predicted values
+    losses = []
+    for true, pred in zip(true_values, pred_values):
+        loss = LANMSE(pred, true)
+        losses.append(loss)
+
+    # Log losses for debugging or monitoring
+    #for i, loss in enumerate(losses, start=1):
+    #    print(f'loss_{i}:', loss)
+
+    total_loss = sum(losses) / len(losses)
+    return total_loss
+
 
 
 def loss_function(tr_pred, rot_pred, tor_pred, sidechain_pred, data, t_to_sigma, device, tr_weight=1, rot_weight=1,
-                  tor_weight=1, backbone_weight=0, sidechain_weight=0, apply_mean=True, no_torsion=False):
+                  tor_weight=1, backbone_weight=0, sidechain_weight=0, apply_mean=True, no_torsion=False, epoch = None, args=None):
     tr_sigma, rot_sigma, tor_sigma = t_to_sigma(
         *[torch.cat([d.complex_t[noise_type] for d in data]) if device.type == 'cuda' else data.complex_t[noise_type]
           for noise_type in ['tr', 'rot', 'tor']])
@@ -120,7 +199,81 @@ def loss_function(tr_pred, rot_pred, tor_pred, sidechain_pred, data, t_to_sigma,
             sidechain_loss, sidechain_base_loss = torch.zeros(len(rot_loss), dtype=torch.float), torch.zeros(
                 len(rot_loss), dtype=torch.float)
 
-    loss = tr_loss * tr_weight + rot_loss * rot_weight + tor_loss * tor_weight + sidechain_loss * sidechain_weight + backbone_loss * backbone_weight
+    
+    if args.compass_weight > 0:
+
+        compass_constant_total = []
+        
+        for i in range(len(data)):
+            try:
+                data = [d.to(device) for d in data] if device.type == 'cuda' else data
+                if i % 2 == 0:
+                    if data[i].tor_score.shape[0] == 0:
+                        data_pr = modify_conformer(data[i], tr_update=tr_pred[i], rot_update=rot_pred[i], 
+                                                torsion_updates=None, pivot=None)
+                    else:
+                        data_pr = modify_conformer(data[i], tr_update=tr_pred[i], rot_update=rot_pred[i], 
+                                                torsion_updates=tor_pred[:data[i].tor_score.shape[0]], pivot=None)
+                        data_pr = data_pr.to(device)
+                else:
+                    if data[i].tor_score.shape[0] == 0:
+                        data_pr = modify_conformer(data[i], tr_update=tr_pred[i], rot_update=rot_pred[i], 
+                                                torsion_updates=None, pivot=None)
+                    else:
+                        data_pr = modify_conformer(data[i], tr_update=tr_pred[i], rot_update=rot_pred[i], 
+                                                torsion_updates=tor_pred[-data[i].tor_score.shape[0]:], pivot=None)
+                        data_pr = data_pr.to(device)
+
+                #ligand_pos = np.asarray(data_pr['ligand'].pos.detach().cpu().numpy() + data[i].original_center.detach().cpu().numpy())
+                ligand_pos = np.asarray(data_pr['ligand'].pos.detach().cpu().numpy() + data[i].original_center.detach().cpu().numpy())
+                current_directory = os.getcwd()
+                ligand_path = f'{current_directory}/DiffDock/data/PDBBind_processed/{data_pr.name}/{data_pr.name}_ligand.sdf'
+                protein_path = f'{current_directory}/DiffDock/data/PDBBind_processed/{data_pr.name}/{data_pr.name}_protein_processed.pdb'
+                mol = read_molecule(ligand_path, remove_hs=True, sanitize=True)
+                mol.RemoveAllConformers()
+                #mol = AddHs(mol)
+                mol = RemoveAllHs(mol)
+                generate_conformer(mol)
+                mol_pred = copy.deepcopy(mol)
+                output_dir = os.path.join(current_directory, f'generated_data/{data_pr.name}')
+
+                os.makedirs(output_dir, exist_ok=True)
+                ligand_path = f'{output_dir}/{data_pr.name}_generated_epoch_{epoch}_lr_{args.lr}_wd_{args.w_decay}_compass_w_{args.compass_weight}.sdf'
+                write_mol_with_coords(mol_pred, ligand_pos, ligand_path)
+                pre_bind_aff, pre_clash, pre_strain_en = process_docked_file(output_dir, ligand_path, protein_path)
+                true_bind_aff, true_clash, true_strain_en = get_compass_precalculated_data(data_pr.name)
+
+                comp_const = compass_constant(true_bind_aff, pre_bind_aff, true_strain_en, pre_strain_en, true_clash, pre_clash)
+                compass_constant_total.append(comp_const.unsqueeze(-1))
+
+            except Exception as e:
+                print(f'An error occurred: {e}')
+                pass
+        
+        if not compass_constant_total:  # This checks if the list is empty
+            compass_constant_total = [torch.tensor([1], dtype=torch.float32), torch.tensor([1], dtype=torch.float32)]
+        #else:
+            # Assuming you might have a list of tensors and you want to concatenate them
+        #    compass_loss_total = torch.cat(compass_loss_total)
+
+
+        compass_constant_total = torch.cat(compass_constant_total)
+        compass_constant_total = torch.mean(compass_constant_total)
+        compass_constant_total = compass_constant_total.unsqueeze(0)
+
+        print('tr_loss:', tr_loss)
+        print('rot_loss:', rot_loss)
+        print('tor_loss:', tor_loss)
+        print('compass_constant_total:', compass_constant_total)
+
+
+        loss = tr_loss * tr_weight + rot_loss * rot_weight + tor_loss * tor_weight + sidechain_loss * sidechain_weight + backbone_loss * backbone_weight + compass_constant_total * args.compass_weight
+
+
+    else:
+
+        loss = tr_loss * tr_weight + rot_loss * rot_weight + tor_loss * tor_weight + sidechain_loss * sidechain_weight + backbone_loss * backbone_weight
+    
     return loss, tr_loss.detach(), rot_loss.detach(), tor_loss.detach(), backbone_loss.detach(), sidechain_loss.detach(), \
            tr_base_loss, rot_base_loss, tor_base_loss, backbone_base_loss, sidechain_base_loss
 
@@ -157,7 +310,8 @@ class AverageMeter():
             return out
 
 
-def train_epoch(model, loader, optimizer, device, t_to_sigma, loss_fn, ema_weights, subsample_size=None):
+
+def train_epoch(model, loader, optimizer, device, t_to_sigma, loss_fn, ema_weights, subsample_size=None, epoch = None, args = None):
     model.train()
     meter = AverageMeter(['loss', 'tr_loss', 'rot_loss', 'tor_loss', 'backbone_loss', 'sidechain_loss',
                           'tr_base_loss', 'rot_base_loss', 'tor_base_loss', 'backbone_base_loss', 'sidechain_base_loss'])
@@ -176,9 +330,11 @@ def train_epoch(model, loader, optimizer, device, t_to_sigma, loss_fn, ema_weigh
             continue
         optimizer.zero_grad()
         data = [d.to(device) for d in data] if device.type == 'cuda' else data
+
+        
         try:
             tr_pred, rot_pred, tor_pred, sidechain_pred = model(data)
-            loss_tuple = loss_fn(tr_pred, rot_pred, tor_pred, sidechain_pred, data=data, t_to_sigma=t_to_sigma, device=device)
+            loss_tuple = loss_fn(tr_pred, rot_pred, tor_pred, sidechain_pred, data=data, t_to_sigma=t_to_sigma, device=device, epoch = epoch, args=args)
             if loss_tuple is None:
                 print("None loss tuple, skipping")
                 continue
@@ -216,7 +372,7 @@ def train_epoch(model, loader, optimizer, device, t_to_sigma, loss_fn, ema_weigh
     return meter.summary()
 
 
-def test_epoch(model, loader, device, t_to_sigma, loss_fn, test_sigma_intervals=False, subsample_size=None):
+def test_epoch(model, loader, device, t_to_sigma, loss_fn, test_sigma_intervals=False, subsample_size=None, epoch=None, args=None):
     model.eval()
     meter = AverageMeter(['loss', 'tr_loss', 'rot_loss', 'tor_loss', 'backbone_loss', 'sidechain_loss',
                           'tr_base_loss', 'rot_base_loss', 'tor_base_loss', 'backbone_base_loss', 'sidechain_base_loss'],
@@ -226,7 +382,7 @@ def test_epoch(model, loader, device, t_to_sigma, loss_fn, test_sigma_intervals=
         meter_all = AverageMeter(
             ['loss', 'tr_loss', 'rot_loss', 'tor_loss', 'backbone_loss', 'sidechain_loss',
              'tr_base_loss', 'rot_base_loss', 'tor_base_loss', 'backbone_base_loss', 'sidechain_base_loss'],
-            unpooled_metrics=True, intervals=10)
+            unpooled_metrics=True, intervals=11)
         
     if subsample_size:
 
@@ -240,7 +396,7 @@ def test_epoch(model, loader, device, t_to_sigma, loss_fn, test_sigma_intervals=
         try:
             with torch.no_grad():
                 tr_pred, rot_pred, tor_pred, sidechain_pred = model(data)
-            loss_tuple = loss_fn(tr_pred, rot_pred, tor_pred, sidechain_pred, data=data, t_to_sigma=t_to_sigma, apply_mean=False, device=device)
+            loss_tuple = loss_fn(tr_pred, rot_pred, tor_pred, sidechain_pred, data=data, t_to_sigma=t_to_sigma, apply_mean=False, device=device, epoch = epoch, args=args)
             if loss_tuple is None: continue
             meter.add([loss_tuple[0].cpu().detach(), *loss_tuple[1:]])
 

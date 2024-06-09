@@ -13,6 +13,7 @@ from rdkit.Chem import RemoveHs, MolToPDBFile
 from torch import nn, Tensor
 from torch_geometric.nn.data_parallel import DataParallel
 from torch_geometric.utils import degree, subgraph
+import pybel
 
 import sys
 import os
@@ -39,6 +40,15 @@ def get_obrmsd(mol1_path, mol2_path, cache_name=None):
         return_code = subprocess.run(f"obrms {mol1_path} {mol2_path} > .openbabel_cache/obrmsd_{cache_name}.rmsd",
                                      shell=True)
         print(return_code)
+        '''# Load molecules using Pybel
+        mol1 = next(pybel.readfile("pdb", mol1_path))
+        mol2 = next(pybel.readfile("pdb", mol2_path))
+        # Calculate RMSD using Pybel
+        rmsd = mol1.calcrmsd(mol2)
+        # Save the RMSD result to a file
+        rmsd_file_path = f".openbabel_cache/obrmsd_{cache_name}.rmsd"
+        with open(rmsd_file_path, 'w') as file:
+            file.write(f"{rmsd}\n")'''
     obrms_output = read_strings_from_txt(f".openbabel_cache/obrmsd_{cache_name}.rmsd")
     rmsds = [line.split(" ")[-1] for line in obrms_output]
     return np.array(rmsds, dtype=np.float)

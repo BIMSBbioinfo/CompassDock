@@ -14,8 +14,8 @@ from torch_geometric.data import Dataset, HeteroData
 from torch_geometric.utils import subgraph
 from tqdm import tqdm
 confProDy(verbosity='none')
-from datasets.process_mols import get_lig_graph_with_matching, moad_extract_receptor_structure
-from utils.utils import read_strings_from_txt
+from DiffDock.datasets.process_mols import get_lig_graph_with_matching, moad_extract_receptor_structure
+from DiffDock.utils.utils import read_strings_from_txt
 
 class MOAD(Dataset):
     def __init__(self, root, transform=None, cache_path='data/cache', split='train', limit_complexes=0, chain_cutoff=None,

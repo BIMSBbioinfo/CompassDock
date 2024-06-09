@@ -9,15 +9,21 @@ import torch
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 import resource
-rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-resource.setrlimit(resource.RLIMIT_NOFILE, (32000, rlimit[1]))
+
+current_soft_limit, current_hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
+desired_soft_limit = 32000
+# Ensure the desired limit does not exceed the current hard limit
+if desired_soft_limit > current_hard_limit:
+    print(f"Desired limit {desired_soft_limit} exceeds the hard limit {current_hard_limit}.")
+    desired_soft_limit = current_hard_limit
+resource.setrlimit(resource.RLIMIT_NOFILE, (desired_soft_limit, current_hard_limit))
 
 import yaml
-from utils.diffusion_utils import t_to_sigma as t_to_sigma_compl, t_to_sigma_individual
-from datasets.loader import construct_loader
-from utils.parsing import parse_train_args
-from utils.training import train_epoch, test_epoch, loss_function, inference_epoch_fix
-from utils.utils import save_yaml_file, get_optimizer_and_scheduler, get_model, ExponentialMovingAverage
+from DiffDock.utils.diffusion_utils import t_to_sigma as t_to_sigma_compl, t_to_sigma_individual
+from DiffDock.datasets.loader import construct_loader
+from DiffDock.utils.parsing import parse_train_args
+from training import train_epoch, test_epoch, loss_function, inference_epoch_fix
+from DiffDock.utils.utils import save_yaml_file, get_optimizer_and_scheduler, get_model, ExponentialMovingAverage
 
 
 def train(args, model, optimizer, scheduler, ema_weights, train_loader, val_loader, t_to_sigma, run_dir, val_dataset2):
@@ -55,30 +61,31 @@ def train(args, model, optimizer, scheduler, ema_weights, train_loader, val_load
             print("Moving to plateu scheduler")
             optimizer, scheduler = get_optimizer_and_scheduler(args, model, step=1, scheduler_mode=scheduler_mode,
                                                                optimizer=optimizer)
-
+        
+        subsample_size = None
         logs = {}
-        train_losses = train_epoch(model, train_loader, optimizer, device, t_to_sigma, loss_fn, ema_weights if epoch > freeze_params else None)
-        print("Epoch {}: Training loss {:.4f}  tr {:.4f}   rot {:.4f}   tor {:.4f}   sc {:.4f}  lr {:.4f}"
+        train_losses = train_epoch(model, train_loader, optimizer, device, t_to_sigma, loss_fn, ema_weights if epoch > freeze_params else None, subsample_size = subsample_size, epoch=epoch, args=args)
+        print("Epoch {}: Training loss {:.4f}  tr {:.4f}   rot {:.4f}   tor {:.4f}   sc {:.4f} lr {:.4f}"
               .format(epoch, train_losses['loss'], train_losses['tr_loss'], train_losses['rot_loss'],
                       train_losses['tor_loss'], train_losses['sidechain_loss'], optimizer.param_groups[0]['lr']))
 
         if epoch > freeze_params:
             ema_weights.store(model.parameters())
             if args.use_ema: ema_weights.copy_to(model.parameters()) # load ema parameters into model for running validation and inference
-        val_losses = test_epoch(model, val_loader, device, t_to_sigma, loss_fn, args.test_sigma_intervals)
+        val_losses = test_epoch(model, val_loader, device, t_to_sigma, loss_fn, args.test_sigma_intervals, subsample_size = subsample_size, epoch=epoch, args=args)
         print("Epoch {}: Validation loss {:.4f}  tr {:.4f}   rot {:.4f}   tor {:.4f}   sc {:.4f}"
               .format(epoch, val_losses['loss'], val_losses['tr_loss'], val_losses['rot_loss'], val_losses['tor_loss'], val_losses['sidechain_loss']))
 
         if args.val_inference_freq != None and (epoch + 1) % args.val_inference_freq == 0:
             inf_dataset = [val_loader.dataset.get(i) for i in range(min(args.num_inference_complexes, val_loader.dataset.__len__()))]
-            inf_metrics = inference_epoch_fix(model, inf_dataset, device, t_to_sigma, args)
+            inf_metrics = inference_epoch_fix(model, inf_dataset, device, t_to_sigma, args, subsample_size = subsample_size)
             print("Epoch {}: Val inference rmsds_lt2 {:.3f} rmsds_lt5 {:.3f} min_rmsds_lt2 {:.3f} min_rmsds_lt5 {:.3f}"
                   .format(epoch, inf_metrics['rmsds_lt2'], inf_metrics['rmsds_lt5'], inf_metrics['min_rmsds_lt2'], inf_metrics['min_rmsds_lt5']))
             logs.update({'valinf_' + k: v for k, v in inf_metrics.items()}, step=epoch + 1)
 
         if args.double_val and args.val_inference_freq != None and (epoch + 1) % args.val_inference_freq == 0:
             inf_dataset = [val_dataset2.get(i) for i in range(min(args.num_inference_complexes, val_dataset2.__len__()))]
-            inf_metrics2 = inference_epoch_fix(model, inf_dataset, device, t_to_sigma, args)
+            inf_metrics2 = inference_epoch_fix(model, inf_dataset, device, t_to_sigma, args, subsample_size = subsample_size)
             print("Epoch {}: Val inference on second validation rmsds_lt2 {:.3f} rmsds_lt5 {:.3f} min_rmsds_lt2 {:.3f} min_rmsds_lt5 {:.3f}"
                   .format(epoch, inf_metrics2['rmsds_lt2'], inf_metrics2['rmsds_lt5'], inf_metrics2['min_rmsds_lt2'], inf_metrics2['min_rmsds_lt5']))
             logs.update({'valinf2_' + k: v for k, v in inf_metrics2.items()}, step=epoch + 1)
@@ -86,7 +93,7 @@ def train(args, model, optimizer, scheduler, ema_weights, train_loader, val_load
 
         if args.train_inference_freq != None and (epoch + 1) % args.train_inference_freq == 0:
             inf_dataset = [train_loader.dataset.get(i) for i in range(min(min(args.num_inference_complexes, 300), train_loader.dataset.__len__()))]
-            inf_metrics = inference_epoch_fix(model, inf_dataset, device, t_to_sigma, args)
+            inf_metrics = inference_epoch_fix(model, inf_dataset, device, t_to_sigma, args, subsample_size = subsample_size)
             print("Epoch {}: Train inference rmsds_lt2 {:.3f} rmsds_lt5 {:.3f} min_rmsds_lt2 {:.3f} min_rmsds_lt5 {:.3f}"
                   .format(epoch, inf_metrics['rmsds_lt2'], inf_metrics['rmsds_lt5'], inf_metrics['min_rmsds_lt2'], inf_metrics['min_rmsds_lt5']))
             logs.update({'traininf_' + k: v for k, v in inf_metrics.items()}, step=epoch + 1)
@@ -203,6 +210,7 @@ def main_function():
         dict = torch.load(f'{args.pretrain_dir}/{args.pretrain_ckpt}.pt', map_location=torch.device('cpu'))
         model.module.load_state_dict(dict, strict=True)
         print("Using pretrained model", f'{args.pretrain_dir}/{args.pretrain_ckpt}.pt')
+        print('device running on:', device)
 
     numel = sum([p.numel() for p in model.parameters()])
     print('Model with', numel, 'parameters')

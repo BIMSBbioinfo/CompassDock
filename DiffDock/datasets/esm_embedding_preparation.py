@@ -7,7 +7,7 @@ from Bio.SeqRecord import SeqRecord
 from tqdm import tqdm
 from Bio import SeqIO
 
-from datasets.constants import three_to_one
+from constants import three_to_one
 
 parser = ArgumentParser()
 parser.add_argument('--out_file', type=str, default="data/prepared_for_esm.fasta")

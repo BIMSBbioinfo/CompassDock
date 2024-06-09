@@ -50,12 +50,13 @@ def get_transformation_mask(pyg_data):
 
 
 def modify_conformer_torsion_angles(pos, edge_index, mask_rotate, torsion_updates, as_numpy=False):
-    pos = copy.deepcopy(pos)
-    if type(pos) != np.ndarray: pos = pos.cpu().numpy()
+    #pos = copy.deepcopy(pos)
+    pos_new = pos.detach().clone()
+    if type(pos) != np.ndarray: pos = pos_new.cpu().numpy() #pos = pos.cpu().numpy()
     
     if type(mask_rotate) == list: mask_rotate = mask_rotate[0]
         
-    for idx_edge, e in enumerate(edge_index.cpu().numpy()):
+    for idx_edge, e in enumerate(edge_index.detach().cpu().numpy()):
         if torsion_updates[idx_edge] == 0:
             continue
         u, v = e[0], e[1]
@@ -67,7 +68,11 @@ def modify_conformer_torsion_angles(pos, edge_index, mask_rotate, torsion_update
         #assert mask_rotate[idx_edge, v]
 
         rot_vec = pos[u] - pos[v]  # convention: positive rotation if pointing inwards
-        rot_vec = rot_vec * torsion_updates[idx_edge] / np.linalg.norm(rot_vec) # idx_edge!
+        if isinstance(torsion_updates[idx_edge], torch.Tensor):
+            torsion_update_value = np.float64(torsion_updates[idx_edge].detach().cpu().numpy())
+        else:
+            torsion_update_value = torsion_updates[idx_edge]
+        rot_vec = rot_vec * torsion_update_value / np.linalg.norm(rot_vec) # idx_edge!
         rot_mat = R.from_rotvec(rot_vec).as_matrix()
 
         pos[mask_rotate[idx_edge]] = (pos[mask_rotate[idx_edge]] - pos[v]) @ rot_mat.T + pos[v]

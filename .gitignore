@@ -7,6 +7,18 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+debug_results/
+workdir_new/
+cache/
+cache_torsion/
+cache_torsion_allatoms/
+PLM/
+DiffDock/data/splits/finetune/old_splits/
+DiffDock/bootstrapping/
+generated_data/
+training_new.py
+arcas_experiments/
+run_wandb_summary.py
 data/
 results/
 wandb/
@@ -31,6 +43,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+esm_embedding_preparation2.py
+moad_lm_embedding_preparation.py
+pdbbind_lm_embedding_preparation.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

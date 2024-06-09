@@ -1,15 +1,21 @@
 import copy
 import os
 import torch
-from datasets.moad import MOAD
-from utils.gnina_utils import get_gnina_poses
-from utils.molecules_utils import get_symmetry_rmsd
+
+import sys
+
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath('/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS_DEV'))
+
+from DiffDock.datasets.moad import MOAD
+from DiffDock.utils.gnina_utils import get_gnina_poses
+from DiffDock.utils.molecules_utils import get_symmetry_rmsd
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 import resource
 rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-resource.setrlimit(resource.RLIMIT_NOFILE, (64000, rlimit[1]))
+resource.setrlimit(resource.RLIMIT_NOFILE, (32000, rlimit[1]))
 
 import time
 from argparse import ArgumentParser, Namespace, FileType
@@ -21,11 +27,11 @@ from rdkit import RDLogger
 from torch_geometric.loader import DataLoader
 from rdkit.Chem import RemoveAllHs
 
-from datasets.pdbbind import PDBBind
-from utils.diffusion_utils import t_to_sigma as t_to_sigma_compl, get_t_schedule
-from utils.sampling import randomize_position, sampling
-from utils.utils import get_model, ExponentialMovingAverage
-from utils.visualise import PDBFile
+from DiffDock.datasets.pdbbind import PDBBind
+from DiffDock.utils.diffusion_utils import t_to_sigma as t_to_sigma_compl, get_t_schedule
+from DiffDock.utils.sampling import randomize_position, sampling
+from DiffDock.utils.utils import get_model, ExponentialMovingAverage
+from DiffDock.utils.visualise import PDBFile
 from tqdm import tqdm
 
 RDLogger.DisableLog('rdApp.*')
@@ -196,6 +202,8 @@ if __name__ == '__main__':
 
     if args.out_dir is None: args.out_dir = f'inference_out_dir_not_specified/{args.run_name}'
     os.makedirs(args.out_dir, exist_ok=True)
+    print('model_dir:', args.model_dir)
+    args.model_dir = '/fast/AG_Akalin/asarigun/Arcas_Stage_1/ROOF/COMPASS_DEV/workdir/v1.1/score_model'
     with open(f'{args.model_dir}/model_parameters.yml') as f:
         score_model_args = Namespace(**yaml.full_load(f))
         if not hasattr(score_model_args, 'separate_noise_schedule'):  # exists for compatibility with old runs that did not have the attribute
@@ -307,7 +315,7 @@ if __name__ == '__main__':
 
     if args.wandb:
         run = wandb.init(
-            entity='',
+            entity='asarigun',
             settings=wandb.Settings(start_method="fork"),
             project=args.project,
             name=args.run_name,
