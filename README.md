@@ -98,6 +98,11 @@ python -W ignore -m finetune --config experiments/model_parameters.yml
 ```
 ## Citation
 
+### License
+
+This code is available for **non-commercial scientific research purposes** as will be defined in the [LICENSE file](LICENSE) which is **Attribution-NonCommercial-NoDerivatives 4.0 International**. By downloading and using this code you agree to the terms in the [LICENSE](LICENSE). Third-party datasets and software are subject to their respective licenses.
+
+Components of the code of the [spyrmsd](spyrmsd) by Rocco Meli (MIT license), [DiffDock](DiffDock) by Gabriele Corso (MIT license), [AA-Score](AA_Score_Tool) by Xiaolin Pan (GNU General Public License v2.0) and [PoseCheck](posecheck) by Charlie Harris (MIT license) were integrated in the repo.
 
 ## Acknowledgements <a name="acknowledgements"></a>
 We extend our deepest gratitude to the following teams for open-sourcing their valuable Repos:
