@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <!--<a href="https://arxiv.org/abs/"><img src="https://img.shields.io/badge/arXiv-preprint-B31B1B?style-for-the-badge&logo=arXiv"/></a>-->
+  <a href="https://arxiv.org/abs/2406.06841"><img src="https://img.shields.io/badge/arXiv-preprint-B31B1B?style-for-the-badge&logo=arXiv"/></a>
   <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-Implementation-EE4C2C?style-for-the-badge&logo=PyTorch"/></a>
   <a href="https://pytorch-geometric.readthedocs.io/en/latest/"><img src="https://img.shields.io/badge/PyG-Implementation-3C2179?style-for-the-badge&logo=PyG"/></a>
   <a href=https://github.com/BIMSBbioinfo/Compass/blob/main/LICENSE><img src="https://img.shields.io/badge/See%20-License%20-blue"/></a>
@@ -30,7 +30,7 @@ Should you have any questions or encounter issues, please feel free to open an i
 
 Check out our paper below for more details:
 
-> [**Compass: A Comprehensive Tool for Accurate and Efficient Molecular Docking in Inference and Fine-Tuning**](https://arxiv.org/abs/),            
+> [**Compass: A Comprehensive Tool for Accurate and Efficient Molecular Docking in Inference and Fine-Tuning**](https://arxiv.org/abs/2406.06841),            
 > [Ahmet Sarıgün](https://asarigun.github.io/), [Vedran Franke](https://de.linkedin.com/in/vedran-franke-1030ba24), [Altuna Akalin](https://al2na.co/)     
 > *Arxiv, 2024*
 
