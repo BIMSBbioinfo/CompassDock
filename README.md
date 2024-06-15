@@ -98,6 +98,16 @@ python -W ignore -m finetune --config experiments/model_parameters.yml
 ```
 ## Citation
 
+please cite the following paper if you use this code/repository in your research:
+```
+@article{sarigun2024compass,
+  title={Compass: A Comprehensive Tool for Accurate and Efficient Molecular Docking in Inference and Fine-Tuning},
+  author={Sarigun, Ahmet and Franke, Vedran and Akalin, Altuna},
+  journal={arXiv preprint arXiv:2406.06841},
+  year={2024}
+}
+```
+
 ### License
 
 This code is available for **non-commercial scientific research purposes** as will be defined in the [LICENSE file](LICENSE) which is **Attribution-NonCommercial-NoDerivatives 4.0 International**. By downloading and using this code you agree to the terms in the [LICENSE](LICENSE). Third-party datasets and software are subject to their respective licenses.
