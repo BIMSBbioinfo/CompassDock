@@ -8,9 +8,11 @@
 
 <p align="center">
   <a href="https://arxiv.org/abs/2406.06841"><img src="https://img.shields.io/badge/arXiv-preprint-B31B1B?style-for-the-badge&logo=arXiv"/></a>
-  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-Implementation-EE4C2C?style-for-the-badge&logo=PyTorch"/></a>
-  <a href="https://pytorch-geometric.readthedocs.io/en/latest/"><img src="https://img.shields.io/badge/PyG-Implementation-3C2179?style-for-the-badge&logo=PyG"/></a>
-  <a href=https://github.com/BIMSBbioinfo/Compass/blob/main/LICENSE><img src="https://img.shields.io/badge/See%20-License%20-blue"/></a>
+  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/Python-3.11-3776AB?style-for-the-badge&logo=python"/></a>
+  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.3.0-EE4C2C?style-for-the-badge&logo=PyTorch"/></a>
+  <a href="https://pytorch-geometric.readthedocs.io/en/latest/"><img src="https://img.shields.io/badge/PyG-2.5.3-3C2179?style-for-the-badge&logo=PyG"/></a>
+  <a href="https://lightning.ai/docs/pytorch/stable/starter/installation.html"><img src="https://img.shields.io/badge/Lightning-2.2.4-792EE5?style-for-the-badge&logo=lightning"/></a>
+  <a href=https://github.com/BIMSBbioinfo/Compass/blob/main/LICENSE><img src="https://img.shields.io/badge/License%20-BY--NC--ND--4.0%20-blue"/></a>
   <!--<a href="Give a link here" alt="license"><img src="https://colab.research.google.com/assets/colab-badge.svg"/></a>-->
 </p>
 
