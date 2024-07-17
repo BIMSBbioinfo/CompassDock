@@ -7,9 +7,9 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import Descriptors
 
-from interaction_components import config
-from interaction_components.utils import vecangle, vector, euclidean3d, projection, is_sidechain
-from interaction_components.utils import whichresnumber, whichrestype, whichchain, get_atom_coords
+from AA_Score_Tool.interaction_components import config
+from AA_Score_Tool.interaction_components.utils import vecangle, vector, euclidean3d, projection, is_sidechain
+from AA_Score_Tool.interaction_components.utils import whichresnumber, whichrestype, whichchain, get_atom_coords
 
 
 def filter_contacts(pairings):

@@ -8,6 +8,11 @@ __pycache__/
 
 # Distribution / packaging
 debug_results/
+DiffDock/evaluation_*/
+DiffDock/*.e*
+DiffDock/*.o*
+DiffDock/evaluation_*.txt
+posecheck_debug/
 workdir_new/
 cache/
 cache_torsion/

@@ -14,8 +14,12 @@ from DiffDock.utils.molecules_utils import get_symmetry_rmsd
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 import resource
-rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-resource.setrlimit(resource.RLIMIT_NOFILE, (32000, rlimit[1]))
+current_soft_limit, current_hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
+desired_soft_limit = 32000
+if desired_soft_limit > current_hard_limit:
+    print(f"Desired limit {desired_soft_limit} exceeds the hard limit {current_hard_limit}.")
+    desired_soft_limit = current_hard_limit
+resource.setrlimit(resource.RLIMIT_NOFILE, (desired_soft_limit, current_hard_limit))
 
 import time
 from argparse import ArgumentParser, Namespace, FileType
@@ -27,12 +31,15 @@ from rdkit import RDLogger
 from torch_geometric.loader import DataLoader
 from rdkit.Chem import RemoveAllHs
 
+from DiffDock.datasets.process_mols import generate_conformer, read_molecule
 from DiffDock.datasets.pdbbind import PDBBind
 from DiffDock.utils.diffusion_utils import t_to_sigma as t_to_sigma_compl, get_t_schedule
 from DiffDock.utils.sampling import randomize_position, sampling
 from DiffDock.utils.utils import get_model, ExponentialMovingAverage
 from DiffDock.utils.visualise import PDBFile
+from DiffDock.datasets.process_mols import write_mol_with_coords
 from tqdm import tqdm
+from compass import process_docked_file
 
 RDLogger.DisableLog('rdApp.*')
 import yaml
@@ -123,6 +130,8 @@ if __name__ == '__main__':
     parser.add_argument('--cache_path', type=str, default='data/cache', help='Folder from where to load/restore cached dataset')
     parser.add_argument('--data_dir', type=str, default='../../ligbind/data/BindingMOAD_2020_ab_processed_biounit/', help='Folder containing original structures')
     parser.add_argument('--split_path', type=str, default='data/BindingMOAD_2020_ab_processed/splits/val.txt', help='Path of file defining the split')
+
+    parser.add_argument('--evaluation_results_path', type=str, default='evaluation_results_inference_DiffDockL', help='Path of file defining the split')
 
     parser.add_argument('--no_model', action='store_true', default=False, help='Whether to return seed conformer without running model')
     parser.add_argument('--no_random', action='store_true', default=False, help='Whether to add randomness in diffusion steps')
@@ -481,6 +490,32 @@ if __name__ == '__main__':
 
                 mol = RemoveAllHs(orig_complex_graph.mol[0])
                 rmsds = []
+                binding_affs = []
+                number_clashes = []
+                strain_engs = []
+
+                for i in range(len(ligand_pos)):
+                    try:
+                        current_directory = os.getcwd()
+                        protein_path = f"{current_directory}/data/PDBBind_processed/{orig_complex_graph['name'][0]}/{orig_complex_graph['name'][0]}_protein_processed.pdb"
+                        generate_conformer(mol)
+                        mol_pred = copy.deepcopy(mol)
+                        output_dir = os.path.join(current_directory, f"{args.evaluation_results_path}/{orig_complex_graph['name'][0]}")
+                        os.makedirs(output_dir, exist_ok=True)
+                        ligand_path = f"{output_dir}/{orig_complex_graph['name'][0]}_evaluation_results_{i}.sdf"
+                        write_mol_with_coords(mol_pred, ligand_pos[i], ligand_path)
+
+                        pre_bind_aff, pre_clash, pre_strain_en = process_docked_file(output_dir, ligand_path, protein_path)
+                        if pre_strain_en is None:
+                            pre_strain_en = 1000
+                        #print(f"Name: {orig_complex_graph['name'][0]}-{i}; Binding Affinity: {pre_bind_aff}; Number of Clashes: {pre_clash}; Strain Energy: {pre_strain_en}")
+                        binding_affs.append(pre_bind_aff)
+                        number_clashes.append(pre_clash)
+                        strain_engs.append(pre_strain_en)
+
+                    except Exception as e:
+                        print("Error:", e)
+
                 for i in range(len(orig_ligand_pos)):
                     try:
                         rmsd = get_symmetry_rmsd(mol, orig_ligand_pos[i], [l for l in ligand_pos])
@@ -490,6 +525,9 @@ if __name__ == '__main__':
                     rmsds.append(rmsd)
                 rmsds = np.asarray(rmsds)
                 rmsd = np.min(rmsds, axis=0)
+                binding_aff = np.asarray(np.around(binding_affs, 5))
+                number_clash = np.asarray(number_clashes)
+                strain_en = np.asarray(strain_engs)
                 
                 centroid_distance = np.min(np.linalg.norm(ligand_pos.mean(axis=1)[None, :] - orig_ligand_pos.mean(axis=1)[:, None], axis=2), axis=0)
 
@@ -501,6 +539,8 @@ if __name__ == '__main__':
                     re_order = np.argsort(confidence)[::-1]
                     print(orig_complex_graph['name'], ' rmsd', np.around(rmsd, 1)[re_order], ' centroid distance',
                           np.around(centroid_distance, 1)[re_order], ' confidences ', np.around(confidence, 4)[re_order],
+                          'binding_aff', binding_aff[re_order], 'number_clash', np.around(number_clash, 2)[re_order],
+                          'strain_en', np.around(strain_en, 2)[re_order],
                           (' gnina rmsd ' + str(np.around(gnina_rmsds, 1))) if args.gnina_minimize else '')
                     confidences_list.append(confidence)
                 else:

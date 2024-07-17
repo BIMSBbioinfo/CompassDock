@@ -4,10 +4,10 @@ import subprocess
 import numpy as np
 from rdkit.Chem import AllChem, RemoveHs, RemoveAllHs
 
-from datasets.process_mols import write_mol_with_coords, read_molecule
+from DiffDock.datasets.process_mols import write_mol_with_coords, read_molecule
 import re
 
-from utils.utils import remove_all_hs
+from DiffDock.utils.utils import remove_all_hs
 
 
 def read_gnina_metrics(gnina_sdf_path):

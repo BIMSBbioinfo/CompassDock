@@ -1,4 +1,4 @@
-from interaction_components.plinteraction import get_interactions
+from AA_Score_Tool.interaction_components.plinteraction import get_interactions
 import numpy as np
 
 from rdkit import Chem

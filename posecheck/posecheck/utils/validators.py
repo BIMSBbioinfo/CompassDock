@@ -14,10 +14,8 @@ def is_reduce_installed(reduce_path: str = REDUCE_PATH) -> bool:
         True if 'reduce' is installed and working, False otherwise.
     """
     try:
-        '''result = subprocess.run([reduce_path, '-version'], capture_output=True, text=True)
-        return result.returncode == 1'''
-        # Check if the file exists and is executable
-        return os.path.isfile(reduce_path) and os.access(reduce_path, os.X_OK)
+        result = subprocess.run([reduce_path, '-version'], capture_output=True, text=True)
+        return result.returncode == 1
     except Exception as e:
         print(f"An error occurred while checking 'reduce': {e}")
         return False

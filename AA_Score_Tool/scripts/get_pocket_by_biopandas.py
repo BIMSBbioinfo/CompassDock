@@ -119,10 +119,13 @@ class GetPocket:
 
 if __name__=="__main__":
     import sys
-    protein_file=sys.argv[1]
-    ligand_file=sys.argv[2]
-    pdb_id=sys.argv[3]
-    get_pocket = GetPocket(ligand_file, protein_file, pdb_id)
+    try:
+        protein_file=sys.argv[1]
+        ligand_file=sys.argv[2]
+        pdb_id=sys.argv[3]
+        get_pocket = GetPocket(ligand_file, protein_file, pdb_id)
+    except Exception as e:
+        print(f"An error occurred since cut-off distance is bigger than 5.5 Angstrom: {e}")
 
 
 
