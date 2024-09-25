@@ -1,5 +1,5 @@
 [project]
-name = "CompassDock"
+name = "compassdock"
 version = "0.1.0"
 description = "A comprehensive accurate assesment approach for deep learning based molecular docking"
 readme = "README.md"
@@ -20,31 +20,30 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
 ]
 
-[project.dependencies]
-torch = "*"
-torchvision = "*"
-PyYAML = "*"
-scipy = "*"
-networkx = "*"
-biopython = "*"
-"rdkit-pypi" = "*"
-e3nn = "*"
-spyrmsd = "*"
-pandas = "*"
-biopandas = "*"
-prody = "2.4.1"
-torch_geometric = "*"
-rdkit = "2023.9.6"
-py3dmol = "2.1.0"
-seaborn = "*"
-prolif = "2.0.3"
-pybel = "0.15.5"
-numpy = "1.26.4"
-
-# Git-based dependencies
-fair-esm = { git = "https://github.com/asarigun/esm.git" }
-dllogger = { git = "https://github.com/NVIDIA/dllogger.git" }
-openfold = { git = "https://github.com/asarigun/openfold.git" }
+dependencies = [
+  "torch",
+  "torchvision",
+  "PyYAML",
+  "scipy",
+  "networkx",
+  "biopython",
+  "rdkit-pypi",
+  "e3nn",
+  "spyrmsd",
+  "pandas",
+  "biopandas",
+  "prody==2.4.1",
+  "torch_geometric",
+  "rdkit==2023.9.6",
+  "py3dmol==2.1.0",
+  "seaborn",
+  "prolif==2.0.3",
+  "pybel==0.15.5",
+  "numpy==1.26.4",
+  "fair-esm @ git+https://github.com/asarigun/esm.git",
+  "dllogger @ git+https://github.com/NVIDIA/dllogger.git",
+  "openfold @ git+https://github.com/asarigun/openfold.git"
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
