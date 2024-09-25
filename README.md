@@ -1,4 +1,4 @@
-# CompassDock 🧭: A Comprehensive Tool for Accurate and Efficient Molecular Docking in Inference and Fine-Tuning
+# CompassDock 🧭
 
 <p align="center">
     Navigating Future Drugs with CompassDock 🧭
@@ -19,14 +19,7 @@
 </p>
 
 
-The CompassDock framework is a comprehensive and accurate assessment approach for deep learning-based molecular docking. It evaluates key factors such as the physical and chemical properties, bioactivity favorability of ligands, strain energy, number of protein-ligand steric clashes, binding affinity, and protein-ligand interaction types.
-
-
-Check out our paper below for more details:
-
-> [**Compass: A Comprehensive Tool for Accurate and Efficient Molecular Docking in Inference and Fine-Tuning**](https://arxiv.org/abs/2406.06841),            
-> [Ahmet Sarıgün](https://asarigun.github.io/), [Vedran Franke](https://de.linkedin.com/in/vedran-franke-1030ba24), [Altuna Akalin](https://al2na.co/)     
-> *Arxiv, 2024*
+The [CompassDock](https://arxiv.org/abs/2406.06841) framework is a comprehensive and accurate assessment approach for deep learning-based molecular docking. It evaluates key factors such as the physical and chemical properties, bioactivity favorability of ligands, strain energy, number of protein-ligand steric clashes, binding affinity, and protein-ligand interaction types.
 
 
 ## Quickstart for CompassDock
