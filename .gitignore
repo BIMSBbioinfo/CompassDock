@@ -19,12 +19,16 @@ cache_torsion/
 cache_torsion_allatoms/
 PLM/
 DiffDock/data/splits/finetune/old_splits/
+others/
+scripts/
+*_esm2_*/
+*.pt
+*.fasta
 DiffDock/bootstrapping/
 generated_data/
 training_new.py
 arcas_experiments/
 run_wandb_summary.py
-data/
 results/
 wandb/
 workdir/

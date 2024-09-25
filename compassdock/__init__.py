@@ -1,0 +1,1 @@
+from compassdock.compassdock import CompassDock
