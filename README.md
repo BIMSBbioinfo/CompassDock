@@ -29,6 +29,9 @@ conda create --name CompassDock python=3.11 -c conda-forge
 conda install -c mx -c conda-forge reduce
 conda install -c conda-forge openbabel
 conda install -c conda-forge datamol
+pip install "fair-esm @ git+https://github.com/asarigun/esm.git",
+pip install "dllogger @ git+https://github.com/NVIDIA/dllogger.git",
+pip install "openfold @ git+https://github.com/asarigun/openfold.git"
 pip install compassdock
 ```
 

@@ -39,10 +39,7 @@ dependencies = [
   "seaborn",
   "prolif==2.0.3",
   "pybel==0.15.5",
-  "numpy==1.26.4",
-  "fair-esm @ git+https://github.com/asarigun/esm.git",
-  "dllogger @ git+https://github.com/NVIDIA/dllogger.git",
-  "openfold @ git+https://github.com/asarigun/openfold.git"
+  "numpy==1.26.4"
 ]
 
 [tool.setuptools.packages.find]
