@@ -61,7 +61,7 @@ More examples coming soon on!
 
 ## CompassDock 🧭 in Fine-Tuning Mode <a name="finetuning"></a>
 
-For instructions on how to use Fine-Tuning Mode, please refer to the [previous branch](https://github.com/BIMSBbioinfo/CompassDock/tree/main?tab=readme-ov-file#datasets--)
+For instructions on how to use Fine-Tuning Mode, please refer to the [previous branch](https://github.com/BIMSBbioinfo/CompassDock/tree/master?tab=readme-ov-file#datasets--)
 
 ## Citation
 
