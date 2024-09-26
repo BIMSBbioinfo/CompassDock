@@ -1,7 +1,7 @@
 [project]
 name = "compassdock"
-version = "0.1.0"
-description = "A comprehensive accurate assesment approach for deep learning based molecular docking"
+version = "0.1.1"
+description = "A comprehensive accurate assessment approach for deep learning based molecular docking"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 license = { file = "LICENSE" }
@@ -21,25 +21,25 @@ classifiers = [
 ]
 
 dependencies = [
-  "torch",
-  "torchvision",
+  "torch==2.3.0",
+  "torchvision==0.18.0",
+  "torchaudio==2.3.0",
   "PyYAML",
   "scipy",
-  "networkx",
+  "networkx[default]",
   "biopython",
   "rdkit-pypi",
   "e3nn",
   "spyrmsd",
-  "pandas",
+  "pandas==2.0.0",
   "biopandas",
   "prody==2.4.1",
-  "torch_geometric",
+  "torch_geometric==2.5.3",
   "rdkit==2023.9.6",
   "py3dmol==2.1.0",
-  "seaborn",
   "prolif==2.0.3",
   "pybel==0.15.5",
-  "numpy==1.26.4"
+  "seaborn"
 ]
 
 [tool.setuptools.packages.find]

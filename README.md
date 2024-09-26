@@ -15,7 +15,7 @@
 </p>
 
 <p float="center">
-  <img src="assets/compassdock.gif" width="98%" />
+  <img src="assets/compassdock.png" width="98%" />
 </p>
 
 
@@ -26,18 +26,18 @@ The [CompassDock](https://arxiv.org/abs/2406.06841) framework is a comprehensive
 
 ```bash
 conda create --name CompassDock python=3.11 -c conda-forge
-conda install -c mx -c conda-forge reduce
+conda install -c ostrokach-forge reduce
 conda install -c conda-forge openbabel
 conda install -c conda-forge datamol
-pip install "fair-esm @ git+https://github.com/asarigun/esm.git",
-pip install "dllogger @ git+https://github.com/NVIDIA/dllogger.git",
-pip install "openfold @ git+https://github.com/asarigun/openfold.git"
 pip install compassdock
+pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
+pip install "fair-esm @ git+https://github.com/asarigun/esm.git"
+pip install "dllogger @ git+https://github.com/NVIDIA/dllogger.git"
+pip install "openfold @ git+https://github.com/asarigun/openfold.git"
 ```
 
 ```python
 from compassdock import CompassDock
-import csv
 
 cd = CompassDock()
 
@@ -56,12 +56,12 @@ print(results)
 ```
 
 
-More examples coming soon on Google Colab!
+More examples coming soon on!
 
 
 ## CompassDock 🧭 in Fine-Tuning Mode <a name="finetuning"></a>
 
-For instructions on how to use Fine-Tuning Mode, please refer to the [previous branch](https://github.com/BIMSBbioinfo/CompassDock?tab=readme-ov-file#compass--in-fine-tuning-mode-)
+For instructions on how to use Fine-Tuning Mode, please refer to the [previous branch](https://github.com/BIMSBbioinfo/CompassDock/tree/main?tab=readme-ov-file#datasets--)
 
 ## Citation
 
