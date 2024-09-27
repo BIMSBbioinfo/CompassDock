@@ -15,7 +15,7 @@
 </p>
 
 <p float="center">
-  <img src="assets/compassdock.png" width="98%" />
+  <img src="https://raw.githubusercontent.com/BIMSBbioinfo/CompassDock/refs/heads/cd_main/assets/compassdock.png" width="98%" />
 </p>
 
 
@@ -56,7 +56,7 @@ print(results)
 ```
 
 
-More examples coming soon on!
+More examples coming soon on Google Colab!
 
 
 ## CompassDock 🧭 in Fine-Tuning Mode <a name="finetuning"></a>
