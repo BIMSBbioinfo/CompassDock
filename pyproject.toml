@@ -1,6 +1,6 @@
 [project]
 name = "compassdock"
-version = "0.1.2"
+version = "0.1.3"
 description = "A comprehensive accurate assessment approach for deep learning based molecular docking"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
@@ -39,7 +39,12 @@ dependencies = [
   "py3dmol==2.1.0",
   "prolif==2.0.3",
   "pybel==0.15.5",
-  "seaborn"
+  "seaborn",
+  "omegaconf",
+  "ml_collections",
+  "dm-tree",
+  "modelcif==1.0",
+  "einops==0.8.0"
 ]
 
 [tool.setuptools.packages.find]

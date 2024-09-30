@@ -6,12 +6,14 @@
 
 <p align="center">
   <a href="https://arxiv.org/abs/2406.06841"><img src="https://img.shields.io/badge/arXiv-preprint-B31B1B?style-for-the-badge&logo=arXiv"/></a>
-  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/Python-3.11-3776AB?style-for-the-badge&logo=python"/></a>
+  <a href="https://www.python.org/downloads/release/python-3110/"><img src="https://img.shields.io/badge/Python-3.11-3776AB?style-for-the-badge&logo=python"/></a>
+  <a href="https://pypi.org/project/compassdock/"><img src="https://img.shields.io/badge/PyPI%20-package%20-3775A9?style-for-the-badge&logo=PyPI"/></a>
   <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.3.0-EE4C2C?style-for-the-badge&logo=PyTorch"/></a>
   <a href="https://pytorch-geometric.readthedocs.io/en/latest/"><img src="https://img.shields.io/badge/PyG-2.5.3-3C2179?style-for-the-badge&logo=PyG"/></a>
-  <a href="https://lightning.ai/docs/pytorch/stable/starter/installation.html"><img src="https://img.shields.io/badge/Lightning-2.2.4-792EE5?style-for-the-badge&logo=lightning"/></a>
   <a href="https://github.com/facebookresearch/esm"><img src="https://img.shields.io/badge/Meta-ESMFold-0467DF?style-for-the-badge&logo=Meta"/></a>
-  <a href=https://github.com/BIMSBbioinfo/Compass/blob/main/LICENSE><img src="https://img.shields.io/badge/License%20-BY--NC--ND--4.0%20-blue"/></a>
+  <!--<a href=https://github.com/BIMSBbioinfo/CompassDock/blob/cd_main/LICENSE><img src="https://img.shields.io/badge/License-MIT-yellow"/></a>
+  <a href="https://github.com/BIMSBbioinfo/CompassDock/blob/cd_main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-EF9421?style-for-the-badge&logo=Creative-Commons"/></a>-->
+  <a href="https://colab.research.google.com/drive/1h-ArOH6EsG-d-ZG5SQDQJxcZPyJwiTVb?usp=sharing"><img src="https://img.shields.io/badge/Google_Colab-Tutorial-F9AB00?style-for-the-badge&logo=googlecolab"/></a>
 </p>
 
 <p float="center">
@@ -55,8 +57,33 @@ results = cd.results()
 print(results)
 ```
 
+### Protein Sequance - Ligand Docking 
 
-More examples coming soon on Google Colab!
+```python
+from compassdock import CompassDock
+
+# Initialize CompassDock
+cd = CompassDock()
+
+# Perform docking using the provided protein and ligand information
+cd.recursive_compassdocking(
+        protein_path = None,
+        protein_sequence = 'GIQSYCTPPYSVLQDPPQPVV',
+        ligand_description = 'CCCCC(NC(=O)CCC(=O)O)P(=O)(O)OC1=CC=CC=C1',
+        complex_name = 'complex_1',
+        molecule_name = 'molecule_1',
+        out_dir = 'results',
+        compass_all = False,
+        max_redocking_step = 1)
+
+# Retrieve and print the docking results
+results = cd.results()
+
+print(results)
+```
+
+
+More examples can be found in <a href="https://colab.research.google.com/drive/1h-ArOH6EsG-d-ZG5SQDQJxcZPyJwiTVb?usp=sharing"><img src="https://img.shields.io/badge/Google_Colab-Tutorial-F9AB00?style-for-the-badge&logo=googlecolab"/></a>!
 
 
 ## CompassDock 🧭 in Fine-Tuning Mode <a name="finetuning"></a>
