@@ -11,8 +11,7 @@
   <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.3.0-EE4C2C?style-for-the-badge&logo=PyTorch"/></a>
   <a href="https://pytorch-geometric.readthedocs.io/en/latest/"><img src="https://img.shields.io/badge/PyG-2.5.3-3C2179?style-for-the-badge&logo=PyG"/></a>
   <a href="https://github.com/facebookresearch/esm"><img src="https://img.shields.io/badge/Meta-ESMFold-0467DF?style-for-the-badge&logo=Meta"/></a>
-  <!--<a href=https://github.com/BIMSBbioinfo/CompassDock/blob/cd_main/LICENSE><img src="https://img.shields.io/badge/License-MIT-yellow"/></a>
-  <a href="https://github.com/BIMSBbioinfo/CompassDock/blob/cd_main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-EF9421?style-for-the-badge&logo=Creative-Commons"/></a>-->
+  <a href="https://github.com/BIMSBbioinfo/CompassDock/blob/cd_main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-EF9421?style-for-the-badge&logo=Creative-Commons"/></a>
   <a href="https://colab.research.google.com/drive/1h-ArOH6EsG-d-ZG5SQDQJxcZPyJwiTVb?usp=sharing"><img src="https://img.shields.io/badge/Google_Colab-Tutorial-F9AB00?style-for-the-badge&logo=googlecolab"/></a>
 </p>
 
