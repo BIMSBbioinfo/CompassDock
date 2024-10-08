@@ -94,8 +94,8 @@ For instructions on how to use Fine-Tuning Mode, please refer to the [previous b
 Please cite the following paper if you use this code/repository in your research:
 ```
 @article{sarigun2024compass,
-  title={Compass: A Comprehensive Tool for Accurate and Efficient Molecular Docking in Inference and Fine-Tuning},
-  author={Sarigun, Ahmet and Franke, Vedran and Akalin, Altuna},
+  title={CompassDock: Comprehensive Accurate Assessment Approach for Deep Learning-Based Molecular Docking in Inference and Fine-Tuning},
+  author={Sarigun, Ahmet and Franke, Vedran and Uyar, Bora and Akalin, Altuna},
   journal={arXiv preprint arXiv:2406.06841},
   year={2024}
 }
